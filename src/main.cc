@@ -2,38 +2,33 @@
 #include <fstream>
 #include <iomanip>
 #include <cstdio>
+#include <cmath>
 
-#include "Eigen/Dense"
-#include "Eigen/Eigenvalues"
-#include "Eigen/Core"
 
-#include <armadillo>
+#include "molecule.h"
 
-using namespace std;
-
-int main()
+int main(int argc, char *argv[])
 {
+    Molecule mol{argv[1], 0};
 
-  int natom;
-  cin >> natom;
+    cout << "Number of atoms: " << mol.natom << endl;
+    cout << "Input Cartesian coordinates:\n";
+    mol.print_geom();
 
-  int *zval = new int[natom];
-  
-  double *x = new double[natom];
-  double *y = new double[natom];
-  double *z = new double[natom];
+    cout << "Interatomic distances (bohr):\n";
+    for(int i=0; i < mol.natom; i++)
+    for(int j=0; j < i; j++)
+        printf("%d %d %8.5f\n", i, j, mol.bond(i,j));
 
-  for(int i=0; i < natom; i++)
-    cin >> zval[i] >> x[i] >> y[i] >> z[i];
+    cout << "\nBond angles:\n";
+    for(int i=0; i < mol.natom; i++) {
+        for(int j=0; j < i; j++) {
+            for(int k=0; k < j; k++) {
+                if(mol.bond(i,j) < 4.0 && mol.bond(j,k) < 4.0)
+                printf("%2d-%2d-%2d %10.6f\n", i, j, k, mol.angle(i,j,k)*(180.0/acos(-1.0)));
+            }
+        }
+    }
 
-  cout << "Number of atoms: " << natom << endl;
-  cout << "Input Cartesian coordinates:\n";
-
-  for(int i=0; i < natom; i++)
-    printf("%d %20.12f %20.12f %20.12f\n", (int) zval[i], x[i], y[i], z[i]);
-
-  delete[] zval;
-  delete[] x;  delete[] y;  delete[] z;
-
-  return 0;
+    return 0;
 }
